@@ -39,6 +39,13 @@ async function run(){
       res.send(options)
     })
 
+    app.get('/bikes/:category', async(req, res)=>{
+      const categoryName = req.params.category;
+      const query = {category: categoryName}
+      const result = await bikesCollection.find(query).toArray()
+      res.send(result)
+    })
+
 
   }
 
