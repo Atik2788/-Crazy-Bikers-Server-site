@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId, ObjectID } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000
 
@@ -96,6 +96,7 @@ async function run() {
     app.delete('/bikes/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) }
+      console.log(filter);
       const result = await bikesCollection.deleteOne(filter)
       res.send(result)
     })
@@ -153,10 +154,20 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/userRole', async(req, res) =>{
+    // get user by role
+    app.get('/userRole', async (req, res) => {
       const user = req.query.role;
-      const query = {role: user}
+      const query = { role: user }
       const result = await usersCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // Delete user by id
+    app.delete('/users/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = {_id: ObjectID(id)}
+      console.log(filter)
+      const result = await usersCollection.deleteOne(filter)
       res.send(result)
     })
 
