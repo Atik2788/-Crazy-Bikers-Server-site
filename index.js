@@ -57,48 +57,60 @@ async function run() {
     })
 
     // post booking info in bike data
-    app.put('/bikes/:id', async(req, res)=>{
+    app.put('/bikes/:id', async (req, res) => {
 
       const id = req.params.id;
       // console.log(id);
-      const filter = {_id: ObjectId(id)}
+      const filter = { _id: ObjectId(id) }
       const options = { upsert: true };
       const updatedDoc = {
-          $set: {
-              status: 'booked',
-              // transactionId: payment.transactionId
-          }
+        $set: {
+          status: 'booked',
+          // transactionId: payment.transactionId
+        }
       }
       const updatedResult = await bikesCollection.updateOne(filter, updatedDoc, options)
 
       res.send(updatedResult)
-  })
+    })
 
     // post advertise info in bike data
-    app.put('/bikesAdvertise/:id', async(req, res)=>{
+    app.put('/bikesAdvertise/:id', async (req, res) => {
 
       const id = req.params.id;
       // console.log(id);
-      const filter = {_id: ObjectId(id)}
+      const filter = { _id: ObjectId(id) }
       const options = { upsert: true };
       const updatedDoc = {
-          $set: {
-              status: 'advertised',
-              // transactionId: payment.transactionId
-          }
+        $set: {
+          status: 'advertised',
+          // transactionId: payment.transactionId
+        }
       }
       const updatedResult = await bikesCollection.updateOne(filter, updatedDoc, options)
 
       res.send(updatedResult)
-  })
+    })
 
-  // delete data by id from database
-  app.delete('/bikes/:id', async(req, res) =>{
+    // delete data by id from database
+    app.delete('/bikes/:id', async (req, res) => {
       const id = req.params.id;
-      const filter = {_id: ObjectId(id)}
+      const filter = { _id: ObjectId(id) }
       const result = await bikesCollection.deleteOne(filter)
       res.send(result)
-  })
+    })
+
+
+
+    // get bikes data by category name from database
+
+    app.get('/bikesStatus', async(req, res) => {
+      const statusAdd = req.query.status;
+      const query = {status: statusAdd}
+      const result = await bikesCollection.find(query).toArray()
+      res.send(result)
+    })
+
 
 
     // ***************************  category  ***************************
@@ -109,14 +121,6 @@ async function run() {
       const query = {};
       const options = await categoryCollection.find(query).toArray();
       res.send(options)
-    })
-
-    // get bikes data by category name from database
-    app.get('/bikes/:category', async (req, res) => {
-      const categoryName = req.params.category;
-      const query = { category: categoryName }
-      const result = await bikesCollection.find(query).toArray()
-      res.send(result)
     })
 
 
