@@ -60,7 +60,7 @@ async function run() {
     app.put('/bikes/:id', async(req, res)=>{
 
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
       const filter = {_id: ObjectId(id)}
       const options = { upsert: true };
       const updatedDoc = {
@@ -74,11 +74,11 @@ async function run() {
       res.send(updatedResult)
   })
 
-    // post booking info in bike data
+    // post advertise info in bike data
     app.put('/bikesAdvertise/:id', async(req, res)=>{
 
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
       const filter = {_id: ObjectId(id)}
       const options = { upsert: true };
       const updatedDoc = {
@@ -90,6 +90,14 @@ async function run() {
       const updatedResult = await bikesCollection.updateOne(filter, updatedDoc, options)
 
       res.send(updatedResult)
+  })
+
+  // delete data by id from database
+  app.delete('/bikes/:id', async(req, res) =>{
+      const id = req.params.id;
+      const filter = {_id: ObjectId(id)}
+      const result = await bikesCollection.deleteOne(filter)
+      res.send(result)
   })
 
 
