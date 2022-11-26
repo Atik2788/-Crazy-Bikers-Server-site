@@ -100,13 +100,11 @@ async function run() {
       res.send(result)
     })
 
-
-
     // get bikes data by category name from database
 
-    app.get('/bikesStatus', async(req, res) => {
+    app.get('/bikesStatus', async (req, res) => {
       const statusAdd = req.query.status;
-      const query = {status: statusAdd}
+      const query = { status: statusAdd }
       const result = await bikesCollection.find(query).toArray()
       res.send(result)
     })
@@ -144,6 +142,10 @@ async function run() {
     })
 
 
+
+    // ***************************  bookings  ***************************
+    // ***************************  bookings  ***************************
+
     // post or add user information in database
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -151,11 +153,10 @@ async function run() {
       res.send(result)
     })
 
-
-    // get question for blog from database
-    app.get('/blogs', async (req, res) => {
-      const query = {}
-      const result = await blogsCollection.find(query).toArray()
+    app.get('/userRole', async(req, res) =>{
+      const user = req.query.role;
+      const query = {role: user}
+      const result = await usersCollection.find(query).toArray()
       res.send(result)
     })
 
