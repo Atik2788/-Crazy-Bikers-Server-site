@@ -27,6 +27,8 @@ async function run() {
     const bookingsCollection = client.db('CrazyBikers').collection('bookings')
     const usersCollection = client.db('CrazyBikers').collection('users')
 
+    const blogsCollection = client.db('CrazyBikers').collection('blogs')
+
 
 
     // get bikes data from database
@@ -35,6 +37,14 @@ async function run() {
       const options = await bikesCollection.find(query).toArray();
       res.send(options)
     })
+
+    // post bike from add bike in database
+    app.post('/bikes', async(req, res)=>{
+      const bike = req.body;
+      const result = await bikesCollection.insertOne(bike)
+      res.send(result)
+    })
+    
 
     // get category data from database
     app.get('/category', async (req, res) => {
@@ -78,6 +88,12 @@ async function run() {
     })
 
 
+    // get question for blog from database
+    app.get('/blogs', async(req, res) =>{
+      const query = {}
+      const result = await blogsCollection.find(query).toArray()
+      res.send(result)
+    })
 
   }
 
