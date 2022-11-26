@@ -51,6 +51,14 @@ async function run() {
     })
 
 
+
+    // get bookings data in database
+    app.get('/bookings', async(req, res)=>{
+      const query = {}
+      const bookings = await bookingsCollection.find(query).toArray()
+      res.send(bookings)
+    })
+
     // post or add booking data in database
     app.post('/bookings', async(req, res)=>{
       const booking = req.body;
@@ -58,6 +66,7 @@ async function run() {
       const result = await bookingsCollection.insertOne(booking)
       res.send(result)
     })
+
 
 
   }
