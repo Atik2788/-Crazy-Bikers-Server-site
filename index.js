@@ -25,6 +25,7 @@ async function run() {
     const bikesCollection = client.db('CrazyBikers').collection('bikes')
     const categoryCollection = client.db('CrazyBikers').collection('category')
     const bookingsCollection = client.db('CrazyBikers').collection('bookings')
+    const usersCollection = client.db('CrazyBikers').collection('users')
 
 
 
@@ -54,7 +55,8 @@ async function run() {
 
     // get bookings data in database
     app.get('/bookings', async(req, res)=>{
-      const query = {}
+      const email = req.query.email;
+      const query = {email:email}
       const bookings = await bookingsCollection.find(query).toArray()
       res.send(bookings)
     })
@@ -64,6 +66,14 @@ async function run() {
       const booking = req.body;
       // console.log(booking)
       const result = await bookingsCollection.insertOne(booking)
+      res.send(result)
+    })
+
+
+    // post or add user information in database
+    app.post('/users', async(req, res)=>{
+      const user = req.body;
+      const result = await usersCollection.insertOne(user)
       res.send(result)
     })
 
