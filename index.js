@@ -44,7 +44,19 @@ async function run() {
       const result = await bikesCollection.insertOne(bike)
       res.send(result)
     })
-    
+
+    // get bikes data by email
+    app.get('/bikes', async(req, res) =>{
+      const email = req.query.email;
+      const query = {email:email}
+      const result = await bikesCollection.find(query).toArray()
+      res.send(result)
+    })
+
+
+
+
+
 
     // get category data from database
     app.get('/category', async (req, res) => {
