@@ -21,6 +21,32 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+
+// ***************************  JWT VERIFY  ***************************
+// ***************************  JWT VERIFY  ***************************
+
+function verifyJWT(req, res, next) {
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send('Unauthorized access')
+  }
+
+  const token = authHeader.split(' ')[1];
+  // console.log(token)
+
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.token.status(403).send({ message: 'forbidden access' })
+    }
+    req.decoded = decoded;
+    next();
+  })
+
+}
+
+
+
 async function run() {
 
   try {
@@ -51,9 +77,9 @@ async function run() {
     })
 
     // get data by category
-    app.get('/bikes/:category', async(req, res)=>{
+    app.get('/bikes/:category', async (req, res) => {
       const categoryName = req.params.category;
-      const query = {category: categoryName}
+      const query = { category: categoryName }
       const result = await bikesCollection.find(query).toArray()
       res.send(result)
     })
@@ -122,9 +148,9 @@ async function run() {
 
 
     //put verify in bike data 
-    app.put('/bikeVerify/:email', async(req, res) =>{
+    app.put('/bikeVerify/:email', async (req, res) => {
       const email = req.params.email;
-      const filter = { email : email};
+      const filter = { email: email };
       // const options = ( upsert: true)
       const updatedDoc = {
         $set: {
@@ -152,8 +178,14 @@ async function run() {
     // ***************************  bookings  ***************************
 
     // get bookings data in database by email
-    app.get('/bookings', async (req, res) => {
+    app.get('/bookings', verifyJWT, async (req, res) => {
       const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+
+      if (email !== decodedEmail) {
+        return res.status(403).send({ message: 'forbidden access from bookings' })
+      }
+
       const query = { email: email }
       const bookings = await bookingsCollection.find(query).toArray()
       res.send(bookings)
@@ -212,9 +244,9 @@ async function run() {
     })
 
     // add user by email
-    app.get('/userEmail', async(req, res)=>{
+    app.get('/userEmail', async (req, res) => {
       const userEmail = req.query.email;
-      const query = {email: userEmail};
+      const query = { email: userEmail };
       const result = await usersCollection.find(query).toArray();
       res.send(result)
     })
