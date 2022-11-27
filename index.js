@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId, ObjectID } = require('mongodb');
 require('dotenv').config();
+const jwt = require('jsonwebtoken')
+
 const port = process.env.PORT || 5000
 
 const app = express()
@@ -45,6 +47,14 @@ async function run() {
     app.post('/bikes', async (req, res) => {
       const bike = req.body;
       const result = await bikesCollection.insertOne(bike)
+      res.send(result)
+    })
+
+    // get data by category
+    app.get('/bikes/:category', async(req, res)=>{
+      const categoryName = req.params.category;
+      const query = {category: categoryName}
+      const result = await bikesCollection.find(query).toArray()
       res.send(result)
     })
 
@@ -101,13 +111,28 @@ async function run() {
       res.send(result)
     })
 
-    // get bikes data by category name from database
 
+    // get bikes data by category name from database
     app.get('/bikesStatus', async (req, res) => {
       const statusAdd = req.query.status;
       const query = { status: statusAdd }
       const result = await bikesCollection.find(query).toArray()
       res.send(result)
+    })
+
+
+    //put verify in bike data 
+    app.put('/bikeVerify/:email', async(req, res) =>{
+      const email = req.params.email;
+      const filter = { email : email};
+      // const options = ( upsert: true)
+      const updatedDoc = {
+        $set: {
+          verify: true,
+        }
+      }
+      const updateBike = await bikesCollection.updateMany(filter, updatedDoc)
+      res.send(updateBike)
     })
 
 
@@ -144,8 +169,8 @@ async function run() {
 
 
 
-    // ***************************  bookings  ***************************
-    // ***************************  bookings  ***************************
+    // ***************************  users  ***************************
+    // ***************************  users  ***************************
 
     // post or add user information in database
     app.post('/users', async (req, res) => {
@@ -153,6 +178,7 @@ async function run() {
       const result = await usersCollection.insertOne(user)
       res.send(result)
     })
+
 
     // get user by role
     app.get('/userRole', async (req, res) => {
@@ -163,13 +189,56 @@ async function run() {
     })
 
     // Delete user by id
-    app.delete('/users/:id', async(req, res)=>{
+    app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
-      const filter = {_id: ObjectID(id)}
+      const filter = { _id: ObjectID(id) }
       console.log(filter)
       const result = await usersCollection.deleteOne(filter)
       res.send(result)
     })
+
+    // add verify in users database
+    app.put('/usersVerify/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const option = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          verify: 'seller'
+        }
+      }
+      const updatedREsult = await usersCollection.updateOne(filter, updatedDoc, option)
+      res.send(updatedREsult)
+    })
+
+    // add user by email
+    app.get('/userEmail', async(req, res)=>{
+      const userEmail = req.query.email;
+      const query = {email: userEmail};
+      const result = await usersCollection.find(query).toArray();
+      res.send(result)
+    })
+
+
+
+    // **************************  JWT  ***************************
+    // **************************  JWT  ***************************
+
+    app.get('/jwt', async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email }
+      const user = await usersCollection.findOne(query)
+
+      if (user) {
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '7d' })
+        return res.send({ accessToken: token })
+      }
+
+      console.log(user)
+      res.status(403).send({ accessToken: '' })
+    })
+
+
 
   }
 
