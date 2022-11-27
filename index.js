@@ -39,6 +39,7 @@ function verifyJWT(req, res, next) {
     if (err) {
       return res.token.status(403).send({ message: 'forbidden access' })
     }
+
     req.decoded = decoded;
     next();
   })
@@ -56,6 +57,30 @@ async function run() {
     const usersCollection = client.db('CrazyBikers').collection('users')
 
     const blogsCollection = client.db('CrazyBikers').collection('blogs')
+
+
+
+
+    // ***************************  Verify Admin  ***************************
+    // ***************************  Verify Admin  ***************************
+    // verify admin
+    const verifyAdmin = async(req, res, next) =>{
+
+      console.log('inside verify admin', req.decoded.email);
+
+      const decodedEmail = req.decoded.email;
+      
+      const query = {email: decodedEmail};
+      const user = await usersCollection.findOne(query)
+      
+      if(user.role !== 'admin'){
+        return res.status(403).send({ message: 'forbidden access from admin verification'})
+      }
+
+      next()
+
+    }
+
 
 
 
@@ -85,9 +110,15 @@ async function run() {
     })
 
     // get bikes data by email
-    app.get('/bikesemail', async (req, res) => {
-      const userEmail = req.query.email;
-      const query = { email: userEmail }
+    app.get('/bikesemail', verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+
+      if (email !== decodedEmail) {
+        return res.status(403).send({ message: 'forbidden access from bike data' })
+      }
+
+      const query = { email: email }
       const bikes = await bikesCollection.find(query).toArray()
       res.send(bikes)
     })
@@ -215,22 +246,42 @@ async function run() {
     // get user by role
     app.get('/userRole', async (req, res) => {
       const user = req.query.role;
+      // const decodedEmail = req.decoded.email
+
       const query = { role: user }
       const result = await usersCollection.find(query).toArray()
       res.send(result)
     })
 
+
     // Delete user by id
-    app.delete('/users/:id', async (req, res) => {
+    app.delete('/usersDelete/:id', verifyJWT,  async (req, res) => {
+      const decodedEmail = req.decoded.email;
+      const query = {email: decodedEmail};
+      const user = await usersCollection.findOne(query);
+
+      if(user?.role !== 'admin'){
+        return res.status(403).send({message: 'Only Admin Can Delete!!'})
+      }
+
+
       const id = req.params.id;
-      const filter = { _id: ObjectID(id) }
-      console.log(filter)
+      const filter = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(filter)
       res.send(result)
     })
 
     // add verify in users database
-    app.put('/usersVerify/:id', async (req, res) => {
+    app.put('/usersVerify/:id', verifyJWT, async (req, res) => {
+      const decodedEmail = req.decoded.email;
+      const query = {email: decodedEmail};
+      const user = await usersCollection.findOne(query);
+
+      if(user?.role !== 'admin'){
+        return res.status(403).send({message: 'Only Admin Can Verify!!'})
+      }
+
+
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const option = { upsert: true };
@@ -243,7 +294,7 @@ async function run() {
       res.send(updatedREsult)
     })
 
-    // add user by email
+    // get user by email
     app.get('/userEmail', async (req, res) => {
       const userEmail = req.query.email;
       const query = { email: userEmail };
@@ -251,6 +302,24 @@ async function run() {
       res.send(result)
     })
 
+
+    // verify admin
+    app.get('/userAdmin/:email', async(req, res)=>{
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query)
+
+      res.send({isAdmin: user?.role ==='admin'})
+    })
+
+    // verify seller
+    app.get('/userSeller/:email', async(req, res)=>{
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query)
+
+      res.send({isSeller: user?.role ==='seller'})
+    })
 
 
     // **************************  JWT  ***************************
@@ -266,7 +335,7 @@ async function run() {
         return res.send({ accessToken: token })
       }
 
-      console.log(user)
+      // console.log(user)
       res.status(403).send({ accessToken: '' })
     })
 
