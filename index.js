@@ -5,12 +5,14 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken')
 
 const port = process.env.PORT || 5000
-
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 const app = express()
 
 // middleware
 app.use(cors())
 app.use(express.json())
+
+
 
 
 
@@ -235,15 +237,16 @@ async function run() {
     // ***************************  bookings  ***************************
 
     // get bookings data in database by email
-    app.get('/bookings', verifyJWT, async (req, res) => {
+    app.get('/bookings', async (req, res) => {
       const email = req.query.email;
-      const decodedEmail = req.decoded.email;
+      // const decodedEmail = req.decoded.email;
 
-      if (email !== decodedEmail) {
-        return res.status(403).send({ message: 'forbidden access from bookings' })
-      }
+      // if (email !== decodedEmail) {
+      //   return res.status(403).send({ message: 'forbidden access from bookings' })
+      // }
+      // const query = { email: email }
 
-      const query = { email: email }
+      const query = {}
       const bookings = await bookingsCollection.find(query).toArray()
       res.send(bookings)
     })
@@ -256,6 +259,34 @@ async function run() {
       res.send(result)
     })
 
+
+    // get bookings by id for payment 
+    app.get('/bookings/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: ObjectId(id) };
+      const result = await bookingsCollection.findOne(query);
+      res.send(result)
+    })
+
+
+    //    // STRIPT PAYMENT 
+       app.post('/create-payment-intent', async(req, res)=>{
+        const booking = req.body;
+        const price = booking.price;
+        const amount = price * 100;
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            currency: 'usd',
+            amount: amount,
+            "payment_method_types": [
+                "card"
+              ]
+        })
+        res.send({
+            clientSecret: paymentIntent.client_secret,
+          });
+
+    })
 
 
     // ***************************  users  ***************************
