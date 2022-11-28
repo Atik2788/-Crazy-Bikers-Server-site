@@ -64,17 +64,17 @@ async function run() {
     // ***************************  Verify Admin  ***************************
     // ***************************  Verify Admin  ***************************
     // verify admin
-    const verifyAdmin = async(req, res, next) =>{
+    const verifyAdmin = async (req, res, next) => {
 
       console.log('inside verify admin', req.decoded.email);
 
       const decodedEmail = req.decoded.email;
-      
-      const query = {email: decodedEmail};
+
+      const query = { email: decodedEmail };
       const user = await usersCollection.findOne(query)
-      
-      if(user.role !== 'admin'){
-        return res.status(403).send({ message: 'forbidden access from admin verification'})
+
+      if (user.role !== 'admin') {
+        return res.status(403).send({ message: 'forbidden access from admin verification' })
       }
 
       next()
@@ -255,13 +255,13 @@ async function run() {
 
 
     // Delete user by id
-    app.delete('/usersDelete/:id', verifyJWT,  async (req, res) => {
+    app.delete('/usersDelete/:id', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email;
-      const query = {email: decodedEmail};
+      const query = { email: decodedEmail };
       const user = await usersCollection.findOne(query);
 
-      if(user?.role !== 'admin'){
-        return res.status(403).send({message: 'Only Admin Can Delete!!'})
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ message: 'Only Admin Can Delete!!' })
       }
 
 
@@ -274,11 +274,11 @@ async function run() {
     // add verify in users database
     app.put('/usersVerify/:id', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email;
-      const query = {email: decodedEmail};
+      const query = { email: decodedEmail };
       const user = await usersCollection.findOne(query);
 
-      if(user?.role !== 'admin'){
-        return res.status(403).send({message: 'Only Admin Can Verify!!'})
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ message: 'Only Admin Can Verify!!' })
       }
 
 
@@ -304,22 +304,22 @@ async function run() {
 
 
     // verify admin
-    app.get('/userAdmin/:email', async(req, res)=>{
+    app.get('/userAdmin/:email', async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query)
 
-      res.send({isAdmin: user?.role ==='admin'})
+      res.send({ isAdmin: user?.role === 'admin' })
     })
-
-    // verify seller
-    app.get('/userSeller/:email', async(req, res)=>{
+    // verify Seller
+    app.get('/userSeller/:email', async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query)
 
-      res.send({isSeller: user?.role ==='seller'})
+      res.send({ isSeller: user?.role === 'seller' })
     })
+
 
 
     // **************************  JWT  ***************************
