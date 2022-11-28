@@ -63,28 +63,6 @@ async function run() {
 
 
 
-    // ***************************  Verify Admin  ***************************
-    // ***************************  Verify Admin  ***************************
-    // verify admin
-    const verifyAdmin = async (req, res, next) => {
-
-      // console.log('inside verify admin', req.decoded.email);
-
-      const decodedEmail = req.decoded.email;
-
-      const query = { email: decodedEmail };
-      const user = await usersCollection.findOne(query)
-
-      if (user.role !== 'admin') {
-        return res.status(403).send({ message: 'forbidden access from admin verification' })
-      }
-
-      next()
-
-    }
-
-
-
 
     // ***************************  bikes  ***************************
     // ***************************  bikes  ***************************
@@ -199,8 +177,8 @@ async function run() {
 
     // get bikes data by reported name from database
     app.get('/bikesReported', async (req, res) => {
-      const statusAdd = req.query.status;
-      const query = { status: statusAdd }
+      const reportAdd = req.query.report;
+      const query = { report: reportAdd }
       const result = await bikesCollection.find(query).toArray()
       res.send(result)
     })
