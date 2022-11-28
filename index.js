@@ -66,7 +66,7 @@ async function run() {
     // verify admin
     const verifyAdmin = async (req, res, next) => {
 
-      console.log('inside verify admin', req.decoded.email);
+      // console.log('inside verify admin', req.decoded.email);
 
       const decodedEmail = req.decoded.email;
 
@@ -141,6 +141,24 @@ async function run() {
       res.send(updatedResult)
     })
 
+
+    // post Report info in bike data
+    app.put('/bikesReport/:id', async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const filter = { _id: ObjectId(id) }
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          report: 'reported',
+          // transactionId: payment.transactionId
+        }
+      }
+      const updatedResult = await bikesCollection.updateOne(filter, updatedDoc, options)
+
+      res.send(updatedResult)
+    })
+
     // post advertise info in bike data
     app.put('/bikesAdvertise/:id', async (req, res) => {
 
@@ -169,8 +187,16 @@ async function run() {
     })
 
 
-    // get bikes data by category name from database
+    // get bikes data by status booked or advertised name from database
     app.get('/bikesStatus', async (req, res) => {
+      const statusAdd = req.query.status;
+      const query = { status: statusAdd }
+      const result = await bikesCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // get bikes data by reported name from database
+    app.get('/bikesReported', async (req, res) => {
       const statusAdd = req.query.status;
       const query = { status: statusAdd }
       const result = await bikesCollection.find(query).toArray()
