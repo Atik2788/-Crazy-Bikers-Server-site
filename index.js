@@ -261,7 +261,7 @@ async function run() {
               ]
         })
         res.send({
-            clientSecret: paymentIntent.client_secret,
+            client_secret: paymentIntent.client_secret,
           });
 
     })
